@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import './Menu.css'
+import './menu.css'
 import { StoreContext } from "../../Context/StoreContext";
 
 function Menu({dishes}) {
