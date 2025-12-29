@@ -2,7 +2,7 @@ import React, { useContext, useState } from "react";
 import { StoreContext } from "../../Context/StoreContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import "./Cart.css";
+import "./cart.css";
 
 const Cart = () => {
   const {
