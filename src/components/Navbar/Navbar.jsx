@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { FaSearch, FaShoppingCart, FaHome, FaInfoCircle, FaUtensils, FaEnvelope, FaUserCircle, FaListAlt } from "react-icons/fa";
-import "./Navbar.css";
+import "./navbar.css";
 import { StoreContext } from "../../Context/StoreContext";
 
 const Navbar = ({ handleLogout }) => {
