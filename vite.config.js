@@ -8,7 +8,7 @@ export default defineConfig({
     // Production build optimizations
     outDir: 'dist',
     sourcemap: false, // Set to true if you need source maps in production
-    minify: 'terser', // Use terser for better minification
+    minify: 'esbuild', // Use terser for better minification
     terserOptions: {
       compress: {
         drop_console: true, // Remove console.log in production
