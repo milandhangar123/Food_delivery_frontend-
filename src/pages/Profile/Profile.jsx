@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import api from "../../utils/api";
 import "./profile.css";
 
 const Profile = () => {
@@ -9,28 +10,28 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const token = localStorage.getItem("token"); // Get token from localStorage
+        const token = localStorage.getItem("token");
         if (!token) {
           setError("No token found. Please log in again.");
           setLoading(false);
           return;
         }
 
-        const response = await fetch("http://localhost:9000/api/user/profile", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = await response.json();
-        if (data.success) {
-          setUserData(data.user);
+        const response = await api.get("/api/user/profile");
+        
+        if (response.data.success) {
+          setUserData(response.data.user);
         } else {
-          setError(data.message || "Failed to fetch profile information.");
+          setError(response.data.message || "Failed to fetch profile information.");
         }
       } catch (err) {
-        setError("Something went wrong. Please try again.");
+        if (err.isAuthError) {
+          setError("Session expired. Please log in again.");
+        } else if (err.isNetworkError) {
+          setError("Network error. Please check your connection.");
+        } else {
+          setError(err.message || "Something went wrong. Please try again.");
+        }
       } finally {
         setLoading(false);
       }
@@ -40,7 +41,12 @@ const Profile = () => {
   }, []);
 
   if (loading) {
-    return <div className="profile-container">Loading...</div>;
+    return (
+      <div className="profile-container loading">
+        <div className="loading-spinner"></div>
+        <p>Loading your profile...</p>
+      </div>
+    );
   }
 
   if (error) {
@@ -49,17 +55,20 @@ const Profile = () => {
 
   return (
     <div className="profile-container">
-      <h1>User Profile</h1>
+      <h1>My Profile</h1>
       <div className="profile-card">
-        <p>
-          <strong>Username:</strong> {userData.username}
-        </p>
-        <p>
-          <strong>Email:</strong> {userData.email}
-        </p>
-        <p>
-          <strong>Phone Number:</strong> {userData.number}
-        </p>
+        <div className="profile-info-item">
+          <strong>👤 Username</strong>
+          <span>{userData.username}</span>
+        </div>
+        <div className="profile-info-item">
+          <strong>📧 Email</strong>
+          <span>{userData.email}</span>
+        </div>
+        <div className="profile-info-item">
+          <strong>📱 Phone Number</strong>
+          <span>{userData.number}</span>
+        </div>
       </div>
     </div>
   );

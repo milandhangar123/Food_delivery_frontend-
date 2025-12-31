@@ -1,8 +1,8 @@
 import React, { useContext, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { StoreContext } from "../../Context/StoreContext";
-import axios from "axios";
-import "./placeoder.css";
+import api from "../../utils/api";
+import "./placeorder.css";
 
 const PlaceOrder = () => {
   const { token, cartItems, food_list, currency } = useContext(StoreContext);
@@ -26,64 +26,90 @@ const PlaceOrder = () => {
     }, 0);
 
     try {
-      const response = await axios.post(
-        "http://localhost:9000/api/order/place",
-        {
-          userId: token, // Assuming `token` contains the user ID
-          selectedItems,
-          address,
-          totalAmount,
-          quantity: cartItems,
-        },
-        {
-          headers: { token },
-        }
-      );
+      const response = await api.post("/api/order/place", {
+        userId: token,
+        selectedItems,
+        address,
+        totalAmount,
+        quantity: cartItems,
+      });
 
       if (response.data.success) {
         alert("Order placed successfully!");
-        navigate("/orders"); // Navigate to orders page
+        navigate("/orders");
       } else {
-        alert("Order placement failed. Please try again.");
+        alert(response.data.message || "Order placement failed. Please try again.");
       }
-    } catch (error) {
-      console.error("Error placing order:", error);
-      alert("Error occurred while processing your order.");
+    } catch (err) {
+      console.error("Error placing order:", err);
+      if (err.isAuthError) {
+        alert("Session expired. Please log in again.");
+        navigate("/login");
+      } else if (err.isNetworkError) {
+        alert("Network error. Please check your connection and try again.");
+      } else {
+        alert(err.message || "Error occurred while processing your order.");
+      }
     } finally {
       setIsProcessing(false);
     }
   };
 
+  const totalAmount = selectedItems.reduce((total, itemId) => {
+    const item = food_list.find((dish) => dish.id === parseInt(itemId));
+    return total + (item ? item.price * cartItems[itemId] : 0);
+  }, 0);
+
   return (
     <div className="placeorder-container">
-      <h2>Place Order</h2>
-      <textarea
-        placeholder="Enter your address"
-        value={address}
-        onChange={(e) => setAddress(e.target.value)}
-        rows="4"
-        cols="50"
-      />
+      <h2>Complete Your Order</h2>
+      <div>
+        <label style={{ display: 'block', marginBottom: '10px', fontWeight: '600', color: 'var(--text-dark)' }}>
+          Delivery Address
+        </label>
+        <textarea
+          placeholder="Enter your complete delivery address..."
+          value={address}
+          onChange={(e) => setAddress(e.target.value)}
+          rows="4"
+          required
+        />
+      </div>
       <div className="order-summary">
         <h3>Order Summary</h3>
         {selectedItems.map((itemId) => {
           const item = food_list.find((dish) => dish.id === parseInt(itemId));
+          if (!item) return null;
           return (
             <div key={item.id} className="order-item">
               <p>
-                {item.name} - {currency}
-                {item.price} x {cartItems[itemId]}
+                <strong>{item.name}</strong>
+              </p>
+              <p>
+                {currency}{item.price} × {cartItems[itemId]} = {currency}{item.price * cartItems[itemId]}
               </p>
             </div>
           );
         })}
+        <div className="order-item" style={{ 
+          marginTop: '20px', 
+          paddingTop: '20px', 
+          borderTop: '2px solid var(--border-color)',
+          fontWeight: '700',
+          fontSize: '1.2rem'
+        }}>
+          <p>Total Amount:</p>
+          <p style={{ color: 'var(--primary-color)', fontSize: '1.5rem' }}>
+            {currency}{totalAmount}
+          </p>
+        </div>
       </div>
       <button
         className="payment-button"
         onClick={handlePayment}
         disabled={isProcessing || !address.trim()}
       >
-        {isProcessing ? "Processing..." : "Pay and Place Order"}
+        {isProcessing ? "Processing Your Order..." : `Pay ${currency}${totalAmount} & Place Order`}
       </button>
     </div>
   );

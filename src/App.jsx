@@ -1,5 +1,5 @@
 import './App.css'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import { Navigate } from 'react-router-dom';
 import Home from "../src/pages/Home/Home";
@@ -16,7 +16,28 @@ import Navbar from './components/Navbar/Navbar';
 
 function App() {
   
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  // Check if user is logged in by checking localStorage token on mount
+  const [isLoggedIn, setIsLoggedIn] = useState(() => {
+    return !!localStorage.getItem('token');
+  });
+  
+  // Sync auth state with token changes (e.g., from other tabs)
+  useEffect(() => {
+    const checkAuth = () => {
+      const token = localStorage.getItem('token');
+      setIsLoggedIn(!!token);
+    };
+    
+    // Check on mount
+    checkAuth();
+    
+    // Listen for storage changes (e.g., login from another tab)
+    window.addEventListener('storage', checkAuth);
+    
+    return () => {
+      window.removeEventListener('storage', checkAuth);
+    };
+  }, []);
   
   const handleLogout = () => {
     setIsLoggedIn(false);

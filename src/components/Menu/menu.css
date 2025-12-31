@@ -1,67 +1,125 @@
-/* Grid container for responsive columns */
 .dishes-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 30px;
+  padding: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
-/* Individual dish card styling */
 .dish-card {
-  width: 180px;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background: var(--bg-white);
+  border-radius: 20px;
   overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition);
   cursor: pointer;
-  transition: transform 0.3s;
+  border: 2px solid transparent;
+  display: flex;
+  flex-direction: column;
 }
 
 .dish-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-xl);
+  border-color: var(--primary-color);
 }
 
-/* Dish image styling */
 .dish-image {
   width: 100%;
-  height: 150px;
+  height: 220px;
   object-fit: cover;
+  transition: var(--transition);
 }
 
-/* Dish body */
+.dish-card:hover .dish-image {
+  transform: scale(1.05);
+}
+
 .dish-body {
-  padding: 10px;
-  text-align: center;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  flex: 1;
 }
 
-/* Dish price */
+.dish-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin: 0;
+  line-height: 1.3;
+}
+
 .dish-price {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  margin: 0;
+}
+
+.add-to-cart-button {
+  width: 100%;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: white;
+  border: none;
+  border-radius: 12px;
   font-size: 1rem;
   font-weight: 600;
-  color: #555;
-  margin: 5px 0;
-}
-
-/* Dish title */
-.dish-title {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin: 8px 0;
-  color: #333;
-}
-
-/* Add to Cart button */
-.add-to-cart-button {
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 5px;
-  font-size: 0.9rem;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+  margin-top: auto;
+  position: relative;
+  overflow: hidden;
+}
+
+.add-to-cart-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.add-to-cart-button:hover::before {
+  width: 300px;
+  height: 300px;
 }
 
 .add-to-cart-button:hover {
-  background-color: #0056b3;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.add-to-cart-button:active {
+  transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dishes-container {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .dish-image {
+    height: 180px;
+  }
+
+  .dish-title {
+    font-size: 1.2rem;
+  }
+
+  .dish-price {
+    font-size: 1.3rem;
+  }
 }

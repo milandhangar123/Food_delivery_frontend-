@@ -1,12 +1,11 @@
 import { createContext, useEffect, useState } from "react";
-import axios from "axios";
+import api, { API_BASE_URL } from "../utils/api";
 import { Dishes } from "../shared/dishes"; // Assuming mock data is still needed
 
 // Create the StoreContext
 export const StoreContext = createContext(null);
 
 const StoreContextProvider = ({ children }) => {
-  const url = "http://localhost:9000"; // Your backend URL
 
   // State variables
   const [food_list, setFoodList] = useState([]);
@@ -23,13 +22,10 @@ const StoreContextProvider = ({ children }) => {
 
     if (token) {
       try {
-        await axios.post(
-          `${url}/api/cart/add`,
-          { itemId },
-          { headers: { token } }
-        );
+        await api.post("/api/cart/add", { itemId });
       } catch (error) {
         console.error("Error adding item to cart:", error);
+        // Don't show error to user for cart operations - fail silently
       }
     }
   };
@@ -48,13 +44,10 @@ const StoreContextProvider = ({ children }) => {
 
     if (token) {
       try {
-        await axios.post(
-          `${url}/api/cart/remove`,
-          { itemId },
-          { headers: { token } }
-        );
+        await api.post("/api/cart/remove", { itemId });
       } catch (error) {
         console.error("Error removing item from cart:", error);
+        // Don't show error to user for cart operations - fail silently
       }
     }
   };
@@ -76,14 +69,17 @@ const StoreContextProvider = ({ children }) => {
   const loadCartData = async () => {
     if (token) {
       try {
-        const response = await axios.post(
-          `${url}/api/cart/get`,
-          {},
-          { headers: { token } }
-        );
-        setCartItems(response.data.cartData);
+        const response = await api.post("/api/cart/get", {});
+        if (response.data.success && response.data.cartData) {
+          setCartItems(response.data.cartData);
+        }
       } catch (error) {
         console.error("Error loading cart data:", error);
+        // If auth error, token might be invalid - clear it
+        if (error.isAuthError) {
+          setToken(null);
+          localStorage.removeItem('token');
+        }
       }
     }
   };

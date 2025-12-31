@@ -36,31 +36,46 @@ const Cart = () => {
     navigate("/placeorder", { state: { selectedFoodItems } });
   };
 
+  const getTotalAmount = () => {
+    return Object.keys(cartItems).reduce((total, itemId) => {
+      const item = food_list.find((dish) => dish.id === parseInt(itemId));
+      if (item) {
+        return total + item.price * cartItems[itemId];
+      }
+      return total;
+    }, 0);
+  };
+
   return (
     <div className="cart-container">
-      <h2>Your Cart</h2>
+      <h2>Your Shopping Cart</h2>
       {Object.keys(cartItems).length === 0 ? (
-        <p>Your cart is empty.</p>
+        <div className="cart-empty">
+          <p>Your cart is empty</p>
+          <p style={{ fontSize: '1rem', marginTop: '10px' }}>Add some delicious items to get started!</p>
+        </div>
       ) : (
-        <div>
-          {Object.keys(cartItems).map((itemId) => {
-            const item = food_list.find(
-              (dish) => dish.id === parseInt(itemId)
-            );
-            return item ? (
-              <div className="cart-item" key={item.id}>
-                <input
-                  type="checkbox"
-                  checked={!!selectedItems[item.id]}
-                  onChange={() => toggleSelectItem(item.id)}
-                />
-                <img src={item.image} alt={item.name} className="cart-image" />
-                <div className="cart-details">
-                  <h3>{item.name}</h3>
-                  <p>
-                    {currency}
-                    {item.price} x {cartItems[item.id]}
-                  </p>
+        <>
+          <div className="cart-items-list">
+            {Object.keys(cartItems).map((itemId) => {
+              const item = food_list.find(
+                (dish) => dish.id === parseInt(itemId)
+              );
+              return item ? (
+                <div className="cart-item" key={item.id}>
+                  <input
+                    type="checkbox"
+                    checked={!!selectedItems[item.id]}
+                    onChange={() => toggleSelectItem(item.id)}
+                  />
+                  <img src={item.image} alt={item.name} className="cart-image" />
+                  <div className="cart-details">
+                    <h3>{item.name}</h3>
+                    <div className="price-info">
+                      {currency}{item.price} × {cartItems[item.id]} = {currency}{item.price * cartItems[item.id]}
+                    </div>
+                    <div className="quantity-info">Quantity: {cartItems[item.id]}</div>
+                  </div>
                   <button
                     className="remove-button"
                     onClick={() => removeFromCart(item.id)}
@@ -68,13 +83,26 @@ const Cart = () => {
                     Remove
                   </button>
                 </div>
-              </div>
-            ) : null;
-          })}
-          <button className="buy-button" onClick={buySelectedItems}>
-            Buy Selected
-          </button>
-        </div>
+              ) : null;
+            })}
+          </div>
+          <div className="cart-summary">
+            <h3>Order Summary</h3>
+            <div className="total-amount">
+              <span>Total Amount:</span>
+              <span className="amount">{currency}{getTotalAmount()}</span>
+            </div>
+            <button 
+              className="buy-button" 
+              onClick={buySelectedItems}
+              disabled={Object.keys(selectedItems).filter(id => selectedItems[id]).length === 0}
+            >
+              {Object.keys(selectedItems).filter(id => selectedItems[id]).length > 0
+                ? `Proceed to Checkout (${Object.keys(selectedItems).filter(id => selectedItems[id]).length} items)`
+                : 'Select items to checkout'}
+            </button>
+          </div>
+        </>
       )}
     </div>
   );

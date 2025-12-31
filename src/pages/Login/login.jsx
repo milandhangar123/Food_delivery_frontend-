@@ -13,36 +13,47 @@ const Login = ({isLoggedIn, setIsLoggedIn }) => {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:9000/api/user/login', {
+      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:9000';
+      const response = await fetch(`${apiBase}/api/user/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(credentials)
       });
+      
       const data = await response.json();
+      
+      if (!response.ok) {
+        // Handle HTTP error status codes (400, 401, etc.)
+        alert(data.message || 'Login Failed');
+        return;
+      }
+      
       if (data.success) {
-        alert('Login Successful');
-        setIsLoggedIn(true);
-        console.log(isLoggedIn);
-        
         localStorage.setItem('token', data.token); // Save token in localStorage
+        setIsLoggedIn(true);
         navigate('/');
       } else {
         alert(data.message || 'Login Failed');
       }
     } catch (err) {
-      console.error(err);
-      alert('An error occurred');
+      console.error('Login error:', err);
+      if (err.isNetworkError) {
+        alert('Network error. Please check your connection and try again.');
+      } else {
+        alert('An error occurred. Please try again.');
+      }
     }
   };
 
   return (
     <div className="login-container">
-      <h2>Login</h2>
+      <h2>Welcome Back!</h2>
+      <p>Sign in to continue to your account</p>
       <form onSubmit={handleLogin}>
         <input
           type="email"
           name="email"
-          placeholder="Email"
+          placeholder="Enter your email"
           value={credentials.email}
           onChange={handleInputChange}
           required
@@ -50,13 +61,16 @@ const Login = ({isLoggedIn, setIsLoggedIn }) => {
         <input
           type="password"
           name="password"
-          placeholder="Password"
+          placeholder="Enter your password"
           value={credentials.password}
           onChange={handleInputChange}
           required
         />
-        <button type="submit">Login</button>
+        <button type="submit">Sign In</button>
       </form>
+      <p className="link-text">
+        Don't have an account? <span onClick={() => navigate('/signup')}>Sign Up</span>
+      </p>
     </div>
   );
 };

@@ -21,48 +21,55 @@ const Signup = ({ setIsLoggedIn }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:9000/api/user/register', {
+      const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:9000';
+      const response = await fetch(`${apiBase}/api/user/register`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'token1': "fhfhhhh" },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
-
-      console.log(response);
       
       const data = await response.json();
-      console.log(data);
+      
+      if (!response.ok) {
+        // Handle HTTP error status codes (400, 409, etc.)
+        alert(data.message || 'Registration Failed');
+        return;
+      }
       
       if (data.success) {
-        alert('Registration Successful');
-        setIsLoggedIn(true);
         localStorage.setItem('token', data.token); // Save token in localStorage
+        setIsLoggedIn(true);
         navigate('/');
-        
       } else {
         alert(data.message || 'Registration Failed');
       }
     } catch (err) {
-      console.error(err);
-      alert('An error occurred');
+      console.error('Registration error:', err);
+      if (err.isNetworkError) {
+        alert('Network error. Please check your connection and try again.');
+      } else {
+        alert('An error occurred. Please try again.');
+      }
     }
   };
 
   return (
     <div className="signup-container">
-      <h2>Sign Up</h2>
+      <h2>Create Account</h2>
+      <p>Join us and start ordering delicious food</p>
       <form onSubmit={handleSubmit}>
         <input
           type="text"
           name="username"
-          placeholder="Username"
+          placeholder="Full Name"
           value={formData.username}
           onChange={handleInputChange}
           required
         />
         <input
-          type="text"
+          type="tel"
           name="number"
-          placeholder="Number"
+          placeholder="Phone Number"
           value={formData.number}
           onChange={handleInputChange}
           required
@@ -70,7 +77,7 @@ const Signup = ({ setIsLoggedIn }) => {
         <input
           type="email"
           name="email"
-          placeholder="Email"
+          placeholder="Email Address"
           value={formData.email}
           onChange={handleInputChange}
           required
@@ -78,15 +85,16 @@ const Signup = ({ setIsLoggedIn }) => {
         <input
           type="password"
           name="password"
-          placeholder="Password"
+          placeholder="Password (min. 8 characters)"
           value={formData.password}
           onChange={handleInputChange}
           required
+          minLength={8}
         />
-        <button type="submit">Register</button>
+        <button type="submit">Create Account</button>
       </form>
-      <p>
-        Already have an account? <span onClick={() => navigate('/login')}>Login</span>
+      <p className="link-text">
+        Already have an account? <span onClick={() => navigate('/login')}>Sign In</span>
       </p>
     </div>
   );
